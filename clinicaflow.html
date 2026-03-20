@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClinicaFlow — Gestão de Clínicas</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g900:#062e25; --g800:#0b4e3c; --g700:#0f6e56; --g600:#1a8a6d;
+  --g500:#22a882; --g400:#3dc49e; --g200:#9ee8d4; --g100:#d1f5ec; --g50:#edfaf6;
+  --n900:#1c1a16; --n700:#4a4640; --n500:#88837a; --n300:#c8c3bb;
+  --n200:#dedad4; --n100:#f0ede8; --n50:#f8f6f3;
+  --white:#fff; --red:#e05252;
+  --fd:'Syne',sans-serif; --fb:'DM Sans',sans-serif;
+  --r:10px; --rl:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);font-size:15px;color:var(--n900);background:var(--n50)}
+button{cursor:pointer;font-family:var(--fb)}
+input,textarea,select{font-family:var(--fb);font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* SCREENS */
+.screen{display:none}
+.screen.on{display:flex}
+#sLanding{flex-direction:column;min-height:100vh}
+#sApp{height:100vh;overflow:hidden}
+#sAuth{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 20px;border-radius:var(--r);font-size:14px;font-weight:500;border:none;transition:all .15s;cursor:pointer}
+.btn-primary{background:var(--g700);color:#fff}
+.btn-primary:hover{background:var(--g800);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,110,86,.25)}
+.btn-ghost{background:transparent;color:var(--n700);border:1px solid var(--n300)}
+.btn-ghost:hover{background:var(--n100)}
+.btn-lg{padding:13px 28px;font-size:16px;border-radius:var(--rl)}
+.btn-full{width:100%;padding:12px}
+
+/* ══════════════════════════════════════════
+   LANDING
+══════════════════════════════════════════ */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 60px;position:sticky;top:0;background:rgba(248,246,243,.93);backdrop-filter:blur(12px);z-index:100;border-bottom:1px solid var(--n100)}
+.logo{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--g700);letter-spacing:-.5px}
+.logo span{color:var(--n500);font-weight:400}
+.nav-links{display:flex;gap:28px;font-size:14px;font-weight:500;color:var(--n500)}
+.nav-links a{cursor:pointer;transition:color .15s}
+.nav-links a:hover{color:var(--g700)}
+.nav-btns{display:flex;gap:10px}
+
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 60px 60px;background:radial-gradient(ellipse 80% 60% at 50% -10%,var(--g50) 0%,transparent 70%)}
+.hero-badge{display:inline-flex;align-items:center;background:var(--g100);color:var(--g800);font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;margin-bottom:22px;letter-spacing:.05em;text-transform:uppercase}
+.hero h1{font-family:var(--fd);font-size:clamp(36px,5vw,62px);font-weight:800;line-height:1.1;letter-spacing:-2px;max-width:760px;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:var(--g700)}
+.hero p{font-size:18px;color:var(--n500);max-width:500px;line-height:1.65;margin-bottom:32px;font-weight:300}
+.hero-btns{display:flex;gap:12px;align-items:center;margin-bottom:56px}
+.hero-note{font-size:12px;color:var(--n500)}
+
+.mock-wrap{width:100%;max-width:880px;background:#fff;border-radius:var(--rl);box-shadow:0 8px 40px rgba(0,0,0,.1);border:1px solid var(--n100);overflow:hidden}
+.mock-bar{background:var(--n50);border-bottom:1px solid var(--n100);padding:10px 14px;display:flex;gap:6px}
+.mock-dot{width:10px;height:10px;border-radius:50%}
+.mock-body{display:grid;grid-template-columns:170px 1fr;min-height:320px}
+.mock-side{background:var(--g900);padding:18px 12px;display:flex;flex-direction:column;gap:3px}
+.mock-item{padding:8px 10px;border-radius:7px;font-size:12px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:8px}
+.mock-item.act{background:var(--g700);color:#fff}
+.mock-main{padding:22px}
+.mock-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.mock-stat{background:var(--n50);border:1px solid var(--n100);border-radius:8px;padding:11px}
+.mock-val{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--g700)}
+.mock-lbl{font-size:10px;color:var(--n500);margin-top:2px}
+.mock-rows{display:flex;flex-direction:column;gap:5px}
+.mock-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--n50);border-radius:6px;border:1px solid var(--n100);font-size:11px;color:var(--n700)}
+.mock-time{font-size:10px;font-weight:700;color:var(--g700);min-width:34px}
+
+.features-sec{padding:80px 60px}
+.sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g600);margin-bottom:12px;text-align:center}
+.sec-title{font-family:var(--fd);font-size:38px;font-weight:800;letter-spacing:-1.5px;text-align:center;margin-bottom:10px}
+.sec-sub{font-size:16px;color:var(--n500);text-align:center;margin-bottom:48px;font-weight:300}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:960px;margin:0 auto}
+.feat-card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:26px;transition:all .2s}
+.feat-card:hover{border-color:var(--g200);box-shadow:0 4px 20px rgba(0,0,0,.07);transform:translateY(-2px)}
+.feat-icon{width:42px;height:42px;background:var(--g50);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.feat-card h3{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:7px}
+.feat-card p{font-size:13px;color:var(--n500);line-height:1.6}
+
+.pricing-sec{padding:80px 60px;background:var(--g900)}
+.pricing-sec .sec-title,.pricing-sec .sec-sub{color:#fff}
+.pricing-sec .sec-sub{color:rgba(255,255,255,.5)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:820px;margin:0 auto}
+.plan{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:26px}
+.plan.pop{background:#fff;border-color:#fff}
+.plan-name-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-bottom:6px}
+.plan.pop .plan-name-label{color:var(--g600)}
+.plan h3{font-family:var(--fd);font-size:19px;font-weight:800;color:#fff;margin-bottom:14px}
+.plan.pop h3{color:var(--n900)}
+.plan-price{display:flex;align-items:baseline;gap:3px;margin-bottom:6px}
+.plan-amt{font-family:var(--fd);font-size:34px;font-weight:800;color:#fff}
+.plan.pop .plan-amt{color:var(--g700)}
+.plan-per{font-size:13px;color:rgba(255,255,255,.4)}
+.plan.pop .plan-per{color:var(--n500)}
+.plan-trial{font-size:12px;color:var(--g400);margin-bottom:18px}
+.plan.pop .plan-trial{color:var(--g600)}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:22px}
+.plan-feats li{font-size:13px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:7px}
+.plan.pop .plan-feats li{color:var(--n700)}
+.plan-feats li::before{content:"✓";color:var(--g400);font-weight:700;flex-shrink:0}
+.plan.pop .plan-feats li::before{color:var(--g600)}
+.plan-btn{width:100%;padding:10px;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);transition:all .15s}
+.plan-btn:hover{background:rgba(255,255,255,.1)}
+.plan.pop .plan-btn{background:var(--g700);color:#fff;border-color:var(--g700)}
+.plan.pop .plan-btn:hover{background:var(--g800)}
+
+.about-sec{padding:80px 60px;background:var(--n50)}
+.about-inner{max-width:960px;margin:0 auto}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:72px}
+.about-text .sec-label{text-align:left}
+.about-text h2{font-family:var(--fd);font-size:38px;font-weight:800;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.15}
+.about-text p{font-size:16px;color:var(--n500);line-height:1.7;margin-bottom:12px;font-weight:300}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.about-stat{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:22px}
+.about-stat-num{font-family:var(--fd);font-size:36px;font-weight:800;color:var(--g700);letter-spacing:-1px}
+.about-stat-lbl{font-size:13px;color:var(--n500);margin-top:4px}
+.about-support{margin-bottom:60px}
+.about-support h3,.about-feedback h3{font-family:var(--fd);font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;text-align:center}
+.about-support p,.about-feedback p{font-size:15px;color:var(--n500);text-align:center;max-width:520px;margin:0 auto 28px;font-weight:300}
+.support-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.support-card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.support-icon{font-size:28px;margin-bottom:10px}
+.support-card-title{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:5px}
+.support-card-sub{font-size:13px;color:var(--n500);line-height:1.55}
+.about-feedback{margin-bottom:60px}
+.feedback-box{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:28px;max-width:600px;margin:0 auto}
+.about-values{margin-bottom:72px}
+.about-values h3{font-family:var(--fd);font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;text-align:center}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.value-card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:22px}
+.value-icon{font-size:24px;margin-bottom:10px}
+.value-card h4{font-family:var(--fd);font-size:15px;font-weight:700;margin-bottom:6px}
+.value-card p{font-size:13px;color:var(--n500);line-height:1.6}
+.cta-box{background:var(--g900);border-radius:var(--rl);padding:52px;text-align:center}
+.cta-box h2{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-1px;color:#fff;margin-bottom:10px}
+.cta-box p{font-size:16px;color:rgba(255,255,255,.55);margin-bottom:28px;font-weight:300}
+.cta-box .btn-primary{background:var(--g500)}
+.cta-box .btn-primary:hover{background:var(--g600)}
+
+/* ══════════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════════ */
+.auth-box{background:#fff;border-radius:var(--rl);width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.auth-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--n100)}
+.auth-head h2{font-family:var(--fd);font-size:18px;font-weight:700}
+.auth-close{background:none;border:none;font-size:20px;color:var(--n500);cursor:pointer;line-height:1;padding:4px}
+.auth-close:hover{color:var(--n900)}
+.auth-body{padding:24px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--n700);margin-bottom:5px}
+.form-input{width:100%;padding:9px 12px;border:1px solid var(--n200);border-radius:var(--r);font-size:14px;color:var(--n900);background:#fff;transition:border-color .15s;outline:none}
+.form-input:focus{border-color:var(--g500)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+textarea.form-input{resize:vertical;min-height:75px}
+.form-err{font-size:13px;color:var(--red);margin-bottom:10px;display:none}
+.auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--n500)}
+.auth-switch span{color:var(--g600);cursor:pointer;font-weight:500}
+.auth-switch span:hover{color:var(--g800)}
+
+/* ══════════════════════════════════════════
+   APP LAYOUT
+══════════════════════════════════════════ */
+.sidebar{width:236px;background:var(--g900);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:22px 18px 18px;font-family:var(--fd);font-size:18px;font-weight:800;color:#fff;border-bottom:1px solid rgba(255,255,255,.07)}
+.sidebar-logo span{color:var(--g400);font-weight:400}
+.sidebar-section{padding:16px 12px 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22)}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.nav-item.active{background:var(--g700);color:#fff}
+.nav-item svg{flex-shrink:0}
+.sidebar-foot{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.07)}
+.sidebar-clinic{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:3px}
+.sidebar-plan{font-size:12px;color:rgba(255,255,255,.6)}
+
+.app-main{flex:1;overflow-y:auto;background:var(--n50);display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--n100);padding:0 32px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10}
+.topbar-title{font-family:var(--fd);font-size:15px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-date{font-size:13px;color:var(--n400)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--g700);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* PAGES */
+.page{display:none;padding:28px 32px;max-width:1080px;flex:1}
+.page.on{display:block}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px}
+.page-title{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-.5px}
+.page-sub{font-size:13px;color:var(--n500);margin-top:3px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--n100)}
+.card-title{font-family:var(--fd);font-size:14px;font-weight:700}
+.card-link{font-size:12px;color:var(--g600);font-weight:500;cursor:pointer}
+.card-link:hover{color:var(--g800)}
+.card-body{padding:14px 18px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:18px}
+.stat.accent{background:var(--g700);border-color:var(--g700)}
+.stat-lbl{font-size:12px;color:var(--n500);font-weight:500;margin-bottom:6px}
+.stat.accent .stat-lbl{color:rgba(255,255,255,.65)}
+.stat-val{font-family:var(--fd);font-size:28px;font-weight:800;letter-spacing:-1px}
+.stat.accent .stat-val{color:#fff}
+.stat-note{font-size:12px;color:var(--n400);margin-top:3px}
+.stat.accent .stat-note{color:rgba(255,255,255,.5)}
+
+/* DASH GRID */
+.dash-grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
+
+/* APPOINTMENTS */
+.appt-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--n100)}
+.appt-item:last-child{border-bottom:none}
+.appt-time{text-align:center;min-width:46px;background:var(--g50);border-radius:7px;padding:5px}
+.appt-time .t{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--g700)}
+.appt-time .d{font-size:10px;color:var(--g500)}
+.appt-info{flex:1}
+.appt-name{font-size:14px;font-weight:500}
+.appt-type{font-size:12px;color:var(--n500);margin-top:1px}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px}
+.badge-ok{background:var(--g100);color:var(--g700)}
+.badge-wait{background:#fef3c7;color:#92400e}
+.badge-cancel{background:#fee2e2;color:#991b1b}
+
+/* REMINDER ITEMS */
+.rem-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--n100)}
+.rem-item:last-child{border-bottom:none}
+.rem-icon{width:30px;height:30px;border-radius:7px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.rem-text{flex:1;font-size:13px;color:var(--n700)}
+.rem-date{font-size:11px;color:var(--n400)}
+
+/* CALENDAR */
+.cal-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.week-nav{display:flex;align-items:center;gap:6px}
+.week-btn{background:#fff;border:1px solid var(--n200);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--n700);cursor:pointer}
+.week-btn:hover{border-color:var(--g400)}
+.week-lbl{font-family:var(--fd);font-size:15px;font-weight:700;min-width:180px;text-align:center}
+.view-toggle{display:flex;background:#fff;border:1px solid var(--n200);border-radius:8px;overflow:hidden}
+.view-btn{padding:7px 14px;font-size:13px;color:var(--n500);border:none;background:none;cursor:pointer}
+.view-btn.active{background:var(--g700);color:#fff}
+
+.cal-grid{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);overflow:hidden}
+.cal-head{display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid var(--n100)}
+.cal-head-cell{padding:10px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--n500)}
+.cal-head-cell .dn{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--n900);display:block;line-height:1}
+.cal-head-cell.today .dn{color:var(--g700)}
+.cal-body{display:grid;grid-template-columns:56px repeat(7,1fr)}
+.cal-time{font-size:10px;color:var(--n400);text-align:right;padding:7px 6px 0;border-bottom:1px solid var(--n100);border-right:1px solid var(--n100)}
+.cal-cell{border-right:1px solid var(--n100);border-bottom:1px solid var(--n100);min-height:52px;padding:3px;cursor:pointer}
+.cal-cell:hover{background:var(--g50)}
+.cal-event{background:var(--g600);color:#fff;border-radius:4px;padding:3px 6px;font-size:11px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.cal-event.wait{background:#f59e0b}
+.cal-event.cancel{background:#ef4444}
+
+/* PATIENTS */
+.search-bar{display:flex;gap:10px;margin-bottom:18px}
+.search-inp{flex:1;padding:10px 14px;border:1px solid var(--n200);border-radius:var(--r);font-size:14px;color:var(--n900);outline:none}
+.search-inp:focus{border-color:var(--g500)}
+.table{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);overflow:hidden}
+.table-head{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 70px;padding:11px 18px;background:var(--n50);border-bottom:1px solid var(--n100)}
+.table-head span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--n400)}
+.p-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 70px;padding:13px 18px;border-bottom:1px solid var(--n100);align-items:center;cursor:pointer;transition:background .1s}
+.p-row:last-child{border-bottom:none}
+.p-row:hover{background:var(--n50)}
+.p-cell-name{display:flex;align-items:center;gap:9px}
+.p-av{width:33px;height:33px;border-radius:50%;background:var(--g100);color:var(--g700);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.p-name{font-size:14px;font-weight:500}
+.p-id{font-size:11px;color:var(--n400)}
+.p-text{font-size:13px;color:var(--n700)}
+.p-muted{font-size:12px;color:var(--n400)}
+.act-btn{background:none;border:1px solid var(--n200);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--n600);cursor:pointer}
+.act-btn:hover{border-color:var(--g400);color:var(--g700)}
+
+/* PATIENT DETAIL */
+.pt-head-card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:22px;display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.pt-av-lg{width:56px;height:56px;border-radius:50%;background:var(--g100);color:var(--g700);font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pt-detail-info h2{font-family:var(--fd);font-size:21px;font-weight:800;letter-spacing:-.5px}
+.pt-meta{display:flex;gap:14px;margin-top:5px;flex-wrap:wrap}
+.pt-meta span{font-size:13px;color:var(--n500)}
+.pt-note-box{margin-top:7px;font-size:13px;color:var(--n500);background:var(--n50);padding:7px 11px;border-radius:7px;border-left:3px solid var(--g400)}
+.pt-grid{display:grid;grid-template-columns:1fr 280px;gap:18px}
+.hist-item{padding:12px 0;border-bottom:1px solid var(--n100)}
+.hist-item:last-child{border-bottom:none}
+.hist-date{font-size:12px;color:var(--n400);margin-bottom:3px}
+.hist-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.hist-note{font-size:13px;color:var(--n500);line-height:1.5}
+
+/* REMINDERS PAGE */
+.rem-config-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--n100)}
+.toggle-row:last-of-type{border-bottom:none}
+.toggle-lbl{font-size:13px;color:var(--n700)}
+.toggle-sub{font-size:11px;color:var(--n400);margin-top:2px}
+.toggle-sw{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--n200);border-radius:99px;cursor:pointer;transition:.2s}
+.toggle-track::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-sw input:checked+.toggle-track{background:var(--g600)}
+.toggle-sw input:checked+.toggle-track::before{transform:translateX(18px)}
+
+.log-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--n100)}
+.log-item:last-child{border-bottom:none}
+.log-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.log-sms{background:#dbeafe;color:#1e40af}
+.log-email{background:var(--g100);color:var(--g700)}
+.log-text{flex:1;font-size:13px;color:var(--n700)}
+.log-ok{color:var(--g600);font-size:13px}
+
+/* SETUP */
+.setup-card{background:#fff;border:1px solid var(--n100);border-radius:var(--rl);padding:22px;margin-bottom:16px}
+.setup-card h3{font-family:var(--fd);font-size:15px;font-weight:700;margin-bottom:18px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:#fff;border-radius:var(--rl);width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--n100)}
+.modal-title{font-family:var(--fd);font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;font-size:19px;color:var(--n500);cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--n900)}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--n100);display:flex;justify-content:flex-end;gap:10px}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px 20px;color:var(--n400)}
+.empty .ei{font-size:34px;margin-bottom:10px}
+.empty p{font-size:14px}
+.empty a{color:var(--g600);cursor:pointer;font-weight:500}
+
+/* CHAT */
+.chat-msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
+.chat-msg.agent{align-self:flex-start}
+.chat-msg.user{align-self:flex-end;align-items:flex-end}
+.chat-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.chat-msg.agent .chat-bubble{background:#fff;border:1px solid var(--n100);color:var(--n900)}
+.chat-msg.user .chat-bubble{background:var(--g700);color:#fff}
+.chat-time{font-size:10px;color:var(--n400)}
+/* HELP */
+.help-item{border-bottom:1px solid var(--n100);cursor:pointer}
+.help-item:last-child{border-bottom:none}
+.help-q{display:flex;align-items:center;justify-content:space-between;padding:13px 0;font-size:14px;font-weight:500;color:var(--n900)}
+.help-q:hover{color:var(--g700)}
+.help-a{font-size:13px;color:var(--n500);line-height:1.6;padding-bottom:13px;display:none}
+.help-item.open .help-a{display:block}
+.help-item.open .help-chevron{transform:rotate(180deg)}
+.help-chevron{font-size:12px;color:var(--n400);transition:transform .2s;flex-shrink:0}
+
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--n900);color:#fff;padding:11px 16px;border-radius:var(--r);font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:7px;animation:tu .25s ease}
+.toast.ok{background:var(--g700)}
+.toast.err{background:var(--red)}
+@keyframes tu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LANDING ══════════════ -->
+<div id="sLanding" class="screen on">
+  <nav class="nav">
+    <div class="logo">Clinica<span>Flow</span></div>
+    <div class="nav-links">
+      <a onclick="gotoSection('sec-features')">Funcionalidades</a>
+      <a onclick="gotoSection('sec-pricing')">Preços</a>
+      <a onclick="gotoSection('sec-cta')">Sobre</a>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-ghost" onclick="openAuth('login')">Entrar</button>
+      <button class="btn btn-primary" onclick="openAuth('register')">Começar grátis →</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">✦ Gestão de clínicas simplificada</div>
+    <h1>A clínica que trabalha<br><em>enquanto descansas</em></h1>
+    <p>Agenda, fichas de pacientes e lembretes automáticos. Tudo num só lugar, pronto em menos de uma hora.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Experimentar 30 dias grátis →</button>
+      <div class="hero-note">Sem cartão de crédito &middot; Setup em 1 hora</div>
+    </div>
+    <div class="mock-wrap">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:14px;font-family:Syne,sans-serif">ClinicaFlow</div>
+          <div class="mock-item act">📅 Agenda</div>
+          <div class="mock-item">👥 Pacientes</div>
+          <div class="mock-item">🔔 Lembretes</div>
+          <div class="mock-item">📊 Dashboard</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-stats">
+            <div class="mock-stat"><div class="mock-val">8</div><div class="mock-lbl">Hoje</div></div>
+            <div class="mock-stat"><div class="mock-val">3</div><div class="mock-lbl">Lembretes</div></div>
+            <div class="mock-stat"><div class="mock-val">142</div><div class="mock-lbl">Pacientes</div></div>
+          </div>
+          <div class="mock-rows">
+            <div class="mock-row"><div class="mock-time">09:00</div>Maria Silva — Consulta geral</div>
+            <div class="mock-row"><div class="mock-time">10:30</div>João Costa — Fisioterapia</div>
+            <div class="mock-row"><div class="mock-time">14:00</div>Ana Rocha — Psicologia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-sec" id="sec-features">
+    <div class="sec-label">Funcionalidades</div>
+    <h2 class="sec-title">Tudo o que precisas,<br>nada do que não precisas</h2>
+    <p class="sec-sub">Feito para clínicas pequenas que querem ser eficientes sem gastar horas a aprender software.</p>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">📅</div><h3>Agenda inteligente</h3><p>Vista semanal e diária. Clica numa hora para marcar consulta instantaneamente.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔔</div><h3>Lembretes automáticos</h3><p>SMS e email enviados automaticamente 24h antes. Reduz faltas em até 40%.</p></div>
+      <div class="feat-card"><div class="feat-icon">📋</div><h3>Fichas digitais</h3><p>Histórico completo do paciente, notas e documentos — tudo num só lugar seguro.</p></div>
+      <div class="feat-card"><div class="feat-icon">💳</div><h3>Pagamentos simples</h3><p>Registo de pagamentos e recibos por email. Sem complexidade contabilística.</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h3>Setup em 1 hora</h3><p>Ao contrário dos concorrentes, estás operacional no próprio dia. Sem formações.</p></div>
+      <div class="feat-card"><div class="feat-icon">📱</div><h3>Acesso mobile</h3><p>Gere a clínica do telemóvel. Consulta a agenda e fichas em qualquer lugar.</p></div>
+    </div>
+  </section>
+
+  <section class="pricing-sec" id="sec-pricing">
+    <div class="sec-label" style="color:rgba(255,255,255,.4)">Preços</div>
+    <h2 class="sec-title">Simples e transparente</h2>
+    <p class="sec-sub">Sem surpresas. Cancela quando quiseres.</p>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-name-label">Starter</div>
+        <h3>Básico</h3>
+        <div class="plan-price"><span class="plan-amt">9.99€</span><span class="plan-per">/mês</span></div>
+        <div class="plan-trial">30 dias grátis</div>
+        <ul class="plan-feats">
+          <li>Até 2 profissionais</li><li>Agenda + marcações</li>
+          <li>Lembretes por email</li><li>50 fichas de pacientes</li>
+        </ul>
+        <button class="plan-btn" onclick="openAuth('register')">Começar grátis</button>
+      </div>
+      <div class="plan pop">
+        <div class="plan-name-label">Mais popular</div>
+        <h3>Clínica</h3>
+        <div class="plan-price"><span class="plan-amt">19.99€</span><span class="plan-per">/mês</span></div>
+        <div class="plan-trial">30 dias grátis</div>
+        <ul class="plan-feats">
+          <li>Profissionais ilimitados</li><li>SMS + email automáticos</li>
+          <li>Pacientes ilimitados</li><li>Registo de pagamentos</li><li>Relatórios mensais</li>
+        </ul>
+        <button class="plan-btn" onclick="openAuth('register')">Começar grátis →</button>
+      </div>
+      <div class="plan">
+        <div class="plan-name-label">Pro</div>
+        <h3>Avançado</h3>
+        <div class="plan-price"><span class="plan-amt">49.99€</span><span class="plan-per">/mês</span></div>
+        <div class="plan-trial">30 dias grátis</div>
+        <ul class="plan-feats">
+          <li>Tudo do plano Clínica</li><li>Múltiplos consultórios</li>
+          <li>Notas com IA</li><li>API + integrações</li><li>Suporte prioritário</li>
+        </ul>
+        <button class="plan-btn" onclick="openAuth('register')">Começar grátis</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-sec" id="sec-cta">
+    <div class="about-inner">
+
+      <div class="about-grid">
+        <div class="about-text">
+          <div class="sec-label">Sobre a ClinicaFlow</div>
+          <h2>Construída por quem conhece as dores das clínicas</h2>
+          <p>A ClinicaFlow nasceu de uma frustração simples: o software para clínicas era ou demasiado caro, ou demasiado complicado — construído para hospitais, não para o dentista da esquina ou o fisioterapeuta independente.</p>
+          <p>Decidimos construir algo diferente. Uma ferramenta que qualquer clínica consegue usar no próprio dia, sem formações nem consultores. Simples, acessível, e que realmente resolve os problemas do dia a dia.</p>
+        </div>
+        <div class="about-stats">
+          <div class="about-stat"><div class="about-stat-num">15k+</div><div class="about-stat-lbl">Clínicas em Portugal sem software adequado</div></div>
+          <div class="about-stat"><div class="about-stat-num">40%</div><div class="about-stat-lbl">Redução de faltas com lembretes automáticos</div></div>
+          <div class="about-stat"><div class="about-stat-num">1h</div><div class="about-stat-lbl">Tempo médio de setup — sem IT, sem formação</div></div>
+          <div class="about-stat"><div class="about-stat-num">30d</div><div class="about-stat-lbl">Trial grátis, sem cartão de crédito</div></div>
+        </div>
+      </div>
+
+      <div class="about-support">
+        <h3>Suporte</h3>
+        <p>Tens um problema ou dúvida? Estamos aqui para ajudar.</p>
+        <div class="support-grid">
+          <div class="support-card">
+            <div class="support-icon">📧</div>
+            <div class="support-card-title">Email</div>
+            <div class="support-card-sub">Resposta em menos de 4 horas nos dias úteis</div>
+            <button class="btn btn-ghost" style="margin-top:14px;font-size:13px" onclick="openSupportModal()">Enviar mensagem →</button>
+          </div>
+          <div class="support-card">
+            <div class="support-icon">💬</div>
+            <div class="support-card-title">Chat ao vivo</div>
+            <div class="support-card-sub">Disponível de seg a sex, das 9h às 18h</div>
+            <button class="btn btn-ghost" style="margin-top:14px;font-size:13px" onclick="openChatModal()">Abrir chat →</button>
+          </div>
+          <div class="support-card">
+            <div class="support-icon">📖</div>
+            <div class="support-card-title">Centro de ajuda</div>
+            <div class="support-card-sub">Guias e respostas às perguntas mais frequentes</div>
+            <button class="btn btn-ghost" style="margin-top:14px;font-size:13px" onclick="openHelpModal()">Ver artigos →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-feedback">
+        <h3>Feedback</h3>
+        <p>A tua opinião constrói o produto. Conta-nos o que funciona, o que falta e o que podemos melhorar.</p>
+        <div class="feedback-box">
+          <div class="form-group"><label class="form-label">Assunto</label>
+            <select class="form-input" id="fbSubject">
+              <option>Sugestão de funcionalidade</option>
+              <option>Problema ou bug</option>
+              <option>Dúvida geral</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Mensagem</label>
+            <textarea class="form-input" id="fbMsg" style="min-height:100px" placeholder="Descreve a tua ideia, problema ou sugestão…"></textarea>
+          </div>
+          <div class="form-group"><label class="form-label">Email (opcional — para receberes resposta)</label>
+            <input class="form-input" type="email" id="fbEmail" placeholder="o-teu@email.pt">
+          </div>
+          <button class="btn btn-primary" onclick="submitFeedback()">Enviar feedback →</button>
+        </div>
+      </div>
+
+      <div class="about-values">
+        <h3>Os nossos valores</h3>
+        <div class="values-grid">
+          <div class="value-card"><div class="value-icon">🎯</div><h4>Simplicidade acima de tudo</h4><p>Cada funcionalidade tem de passar um teste: é mesmo necessária? Se não, não entra. O teu tempo é demasiado valioso para aprender software complexo.</p></div>
+          <div class="value-card"><div class="value-icon">🔒</div><h4>Privacidade e segurança</h4><p>Os dados dos teus pacientes são sagrados. Cumprimos o RGPD, encriptamos tudo e nunca vendemos dados a terceiros — ponto final.</p></div>
+          <div class="value-card"><div class="value-icon">💬</div><h4>Suporte real</h4><p>Quando tens um problema, queres falar com uma pessoa, não com um bot. Respondemos em menos de 4 horas nos dias úteis — sempre.</p></div>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <h2>Pronto para começar?</h2>
+        <p>30 dias grátis. Sem cartão de crédito. Cancela quando quiseres.</p>
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar conta grátis →</button>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════ SUPPORT MODAL ══════════════ -->
+<div class="modal-overlay" id="m-support">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Contactar suporte</div><button class="modal-close" onclick="closeModal('support')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Assunto</label>
+        <select class="form-input" id="supSubject">
+          <option>Problema técnico</option><option>Dúvida sobre faturação</option>
+          <option>Dúvida sobre funcionalidade</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Mensagem</label>
+        <textarea class="form-input" id="supMsg" style="min-height:100px" placeholder="Descreve o teu problema ou dúvida em detalhe…"></textarea>
+      </div>
+      <div class="form-group"><label class="form-label">O teu email</label>
+        <input class="form-input" type="email" id="supEmail" placeholder="para-te-respondermos@email.pt">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('support')">Cancelar</button>
+      <button class="btn btn-primary" onclick="sendSupport()">Enviar mensagem →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CHAT MODAL ══════════════ -->
+<div class="modal-overlay" id="m-chat">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">💬 Chat ao vivo</div><button class="modal-close" onclick="closeModal('chat')">✕</button></div>
+    <div class="modal-body" style="padding:0">
+      <div id="chatMessages" style="height:280px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--n50)">
+        <div class="chat-msg agent"><div class="chat-bubble">Olá! 👋 Sou o assistente da ClinicaFlow. Como posso ajudar?</div><div class="chat-time">Agora</div></div>
+      </div>
+      <div style="padding:14px;border-top:1px solid var(--n100);display:flex;gap:8px">
+        <input class="form-input" id="chatInput" placeholder="Escreve a tua mensagem…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ HELP MODAL ══════════════ -->
+<div class="modal-overlay" id="m-help">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><div class="modal-title">📖 Centro de ajuda</div><button class="modal-close" onclick="closeModal('help')">✕</button></div>
+    <div class="modal-body" style="padding:0;max-height:70vh;overflow-y:auto">
+      <div style="padding:16px">
+        <input class="form-input" id="helpSearch" placeholder="Pesquisar artigos…" oninput="filterHelp()" style="margin-bottom:16px">
+        <div id="helpList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ AUTH SCREEN ══════════════ -->
+<div id="sAuth" class="screen">
+  <div class="auth-box">
+    <div class="auth-head">
+      <h2 id="authTitle">Criar conta</h2>
+      <button class="auth-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="auth-body">
+      <!-- REGISTER -->
+      <div id="formRegister">
+        <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="rName" type="text" placeholder="O teu nome"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="rEmail" type="email" placeholder="clinica@email.pt"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="rPass" type="password" placeholder="Mínimo 6 caracteres"></div>
+        <div class="form-group"><label class="form-label">Nome da clínica</label><input class="form-input" id="rClinic" type="text" placeholder="Ex: Clínica Dr. Silva"></div>
+        <div class="form-group">
+          <label class="form-label">Especialidade</label>
+          <select class="form-input" id="rSpec"><option>Clínica geral</option><option>Fisioterapia</option><option>Psicologia</option><option>Dentista</option><option>Nutrição</option><option>Dermatologia</option><option>Outra</option></select>
+        </div>
+        <div class="form-err" id="rErr"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Criar conta grátis →</button>
+        <div class="auth-switch">Já tens conta? <span onclick="openAuth('login')">Entrar →</span></div>
+      </div>
+      <!-- LOGIN -->
+      <div id="formLogin" style="display:none">
+        <div style="text-align:center;margin-bottom:22px"><div style="font-size:34px;margin-bottom:6px">👋</div><div style="font-size:14px;color:var(--n500)">Bem-vindo de volta</div></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="lEmail" type="email" placeholder="clinica@email.pt"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="lPass" type="password" placeholder="A tua password"></div>
+        <div class="form-err" id="lErr"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar →</button>
+        <div class="auth-switch">Não tens conta? <span onclick="openAuth('register')">Criar conta grátis →</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="sApp" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Clinica<span>Flow</span></div>
+    <div class="sidebar-section">Principal</div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" id="ni-dashboard" onclick="goPage('dashboard')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" id="ni-agenda" onclick="goPage('agenda')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda
+      </div>
+      <div class="nav-item" id="ni-patients" onclick="goPage('patients')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Pacientes
+      </div>
+      <div class="nav-item" id="ni-reminders" onclick="goPage('reminders')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Lembretes
+      </div>
+    </div>
+    <div class="sidebar-section">Conta</div>
+    <div class="sidebar-nav">
+      <div class="nav-item" id="ni-setup" onclick="goPage('setup')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Configurações
+      </div>
+      <div class="nav-item" onclick="doLogout()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="sidebar-clinic" id="sClinicName">Clínica</div>
+      <div class="sidebar-plan">Plano Clínica · Ativo</div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate"></div>
+        <div class="avatar" id="userAv">?</div>
+      </div>
+    </div>
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page on" id="p-dashboard">
+      <div class="page-head">
+        <div><div class="page-title">Bom dia! 👋</div><div class="page-sub" id="dashDate"></div></div>
+        <button class="btn btn-primary" onclick="openModal('appt')">+ Nova consulta</button>
+      </div>
+      <div class="stats-grid" id="dashStats"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Consultas de hoje</div><div class="card-link" onclick="goPage('agenda')">Ver agenda →</div></div>
+          <div class="card-body" id="dashAppts"></div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-head"><div class="card-title">Lembretes recentes</div><div class="card-link" onclick="goPage('reminders')">Ver todos →</div></div>
+            <div class="card-body" id="dashRem"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">Ação rápida</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-primary" style="width:100%" onclick="openModal('appt')">📅 Marcar consulta</button>
+              <button class="btn btn-ghost" style="width:100%" onclick="openModal('patient')">👤 Novo paciente</button>
+              <button class="btn btn-ghost" style="width:100%" onclick="goPage('reminders')">🔔 Configurar lembretes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: AGENDA -->
+    <div class="page" id="p-agenda">
+      <div class="page-head">
+        <div><div class="page-title">Agenda</div><div class="page-sub">Vista semanal das consultas</div></div>
+        <button class="btn btn-primary" onclick="openModal('appt')">+ Nova consulta</button>
+      </div>
+      <div class="cal-toolbar">
+        <div class="week-nav">
+          <button class="week-btn" onclick="shiftWeek(-1)">←</button>
+          <div class="week-lbl" id="weekLbl"></div>
+          <button class="week-btn" onclick="shiftWeek(1)">→</button>
+        </div>
+        <button class="btn btn-ghost" style="font-size:13px" onclick="resetWeek()">Hoje</button>
+        <div class="view-toggle" style="margin-left:auto">
+          <button class="view-btn active">Semana</button>
+          <button class="view-btn">Dia</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- PAGE: PATIENTS LIST -->
+    <div class="page" id="p-patients">
+      <div class="page-head">
+        <div><div class="page-title">Pacientes</div><div class="page-sub" id="patSub"></div></div>
+        <button class="btn btn-primary" onclick="openModal('patient')">+ Novo paciente</button>
+      </div>
+      <div class="search-bar">
+        <input class="search-inp" id="patSearch" type="text" placeholder="Pesquisar por nome, telefone ou email…" oninput="renderPatients()">
+      </div>
+      <div class="table">
+        <div class="table-head"><span>Paciente</span><span>Contacto</span><span>Última visita</span><span>Estado</span><span></span></div>
+        <div id="patBody"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: PATIENT DETAIL -->
+    <div class="page" id="p-patientDetail">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--n500);cursor:pointer;margin-bottom:18px" onclick="goPage('patients')">← Voltar à lista</div>
+      <div id="patDetailBody"></div>
+    </div>
+
+    <!-- PAGE: REMINDERS -->
+    <div class="page" id="p-reminders">
+      <div class="page-head">
+        <div><div class="page-title">Lembretes automáticos</div><div class="page-sub">Configura quando os pacientes são notificados</div></div>
+      </div>
+      <div class="rem-config-grid">
+        <div class="setup-card">
+          <h3>📧 Email</h3>
+          <div class="toggle-row"><div><div class="toggle-lbl">Lembrete 48h antes</div><div class="toggle-sub">2 dias antes da consulta</div></div><label class="toggle-sw"><input type="checkbox" checked onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-lbl">Lembrete 24h antes</div><div class="toggle-sub">Dia anterior</div></div><label class="toggle-sw"><input type="checkbox" checked onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-lbl">Confirmação de marcação</div><div class="toggle-sub">Enviado ao marcar</div></div><label class="toggle-sw"><input type="checkbox" checked onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+        </div>
+        <div class="setup-card">
+          <h3>📱 SMS</h3>
+          <div class="toggle-row"><div><div class="toggle-lbl">Lembrete 24h antes</div><div class="toggle-sub">SMS no dia anterior</div></div><label class="toggle-sw"><input type="checkbox" checked onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-lbl">Lembrete 2h antes</div><div class="toggle-sub">SMS no próprio dia</div></div><label class="toggle-sw"><input type="checkbox" onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-lbl">Pedido de avaliação</div><div class="toggle-sub">Após a consulta</div></div><label class="toggle-sw"><input type="checkbox" onchange="toast('Configuração guardada','ok')"><span class="toggle-track"></span></label></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Log de notificações</div></div>
+        <div class="card-body" id="remLog"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: SETUP -->
+    <div class="page" id="p-setup">
+      <div class="page-head"><div><div class="page-title">Configurações</div><div class="page-sub">Dados da tua clínica</div></div></div>
+      <div class="setup-card">
+        <h3>Dados da clínica</h3>
+        <div class="form-group"><label class="form-label">Nome da clínica</label><input class="form-input" id="setupName" type="text" oninput="updateClinicName()"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Especialidade</label><select class="form-input" id="setupSpec"><option>Clínica geral</option><option>Fisioterapia</option><option>Psicologia</option><option>Dentista</option><option>Nutrição</option><option>Dermatologia</option><option>Outra</option></select></div>
+          <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" type="text" placeholder="+351 910 000 000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email da clínica</label><input class="form-input" type="email" placeholder="clinica@email.pt"></div>
+        <button class="btn btn-primary" style="margin-top:6px" onclick="toast('Configurações guardadas!','ok')">Guardar alterações</button>
+      </div>
+      <div class="setup-card">
+        <h3>Horário de funcionamento</h3>
+        <div id="scheduleBody"></div>
+      </div>
+    </div>
+
+  </div><!-- app-main -->
+</div><!-- sApp -->
+
+<!-- ══════════════ MODALS ══════════════ -->
+<!-- APPOINTMENT MODAL -->
+<div class="modal-overlay" id="m-appt">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Nova consulta</div><button class="modal-close" onclick="closeModal('appt')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Paciente</label><select class="form-input" id="aPatient"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="aDate"></div>
+        <div class="form-group"><label class="form-label">Hora</label><input class="form-input" type="time" id="aTime" value="09:00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-input" id="aType"><option>Consulta geral</option><option>Fisioterapia</option><option>Psicologia</option><option>Nutrição</option><option>Exame</option><option>Seguimento</option></select></div>
+        <div class="form-group"><label class="form-label">Duração</label><select class="form-input" id="aDur"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>1 hora</option><option value="90">1h 30min</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notas (opcional)</label><textarea class="form-input" id="aNotes" placeholder="Informações adicionais…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('appt')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAppt()">Marcar consulta</button>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT MODAL -->
+<div class="modal-overlay" id="m-patient">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Novo paciente</div><button class="modal-close" onclick="closeModal('patient')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" type="text" id="pName" placeholder="Nome Apelido"></div>
+        <div class="form-group"><label class="form-label">Data de nascimento</label><input class="form-input" type="date" id="pBirth"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" type="text" id="pPhone" placeholder="+351 9XX XXX XXX"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="pEmail" placeholder="nome@email.pt"></div>
+      </div>
+      <div class="form-group"><label class="form-label">NIF (opcional)</label><input class="form-input" type="text" id="pNif"></div>
+      <div class="form-group"><label class="form-label">Notas / historial relevante</label><textarea class="form-input" id="pNotes" placeholder="Alergias, medicação…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('patient')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePatient()">Adicionar paciente</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW APPOINTMENT MODAL -->
+<div class="modal-overlay" id="m-viewAppt">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Detalhes da consulta</div><button class="modal-close" onclick="closeModal('viewAppt')">✕</button></div>
+    <div class="modal-body" id="viewApptBody"></div>
+    <div class="modal-foot" id="viewApptFoot"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+var S = {
+  get: function(k) { try { return JSON.parse(localStorage.getItem('cf2_'+k)); } catch(e) { return null; } },
+  set: function(k, v) { localStorage.setItem('cf2_'+k, JSON.stringify(v)); }
+};
+
+// ══════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(el) { el.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+// ══════════════════════════════════════════
+// LANDING NAV
+// ══════════════════════════════════════════
+function gotoSection(id) {
+  var el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function openAuth(mode) {
+  document.getElementById('formRegister').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('formLogin').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('authTitle').textContent = mode === 'register' ? 'Criar conta' : 'Entrar';
+  document.getElementById('rErr').style.display = 'none';
+  document.getElementById('lErr').style.display = 'none';
+  show('sAuth');
+}
+
+function closeAuth() {
+  show('sLanding');
+}
+
+function showErr(id, msg) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function doRegister() {
+  var name = document.getElementById('rName').value.trim();
+  var email = document.getElementById('rEmail').value.trim();
+  var pass = document.getElementById('rPass').value;
+  var clinic = document.getElementById('rClinic').value.trim();
+  var spec = document.getElementById('rSpec').value;
+  if (!name) { showErr('rErr', 'Insere o teu nome'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('rErr', 'Email inválido'); return; }
+  if (pass.length < 6) { showErr('rErr', 'Password deve ter pelo menos 6 caracteres'); return; }
+  if (!clinic) { showErr('rErr', 'Insere o nome da clínica'); return; }
+  var accounts = S.get('accounts') || {};
+  if (accounts[email]) { showErr('rErr', 'Este email já tem conta — faz login'); return; }
+  var uid = 'u_' + Date.now();
+  accounts[email] = { id: uid, name: name, email: email, pass: pass, clinic: clinic, spec: spec };
+  S.set('accounts', accounts);
+  S.set('session', { uid: uid, name: name, email: email, clinic: clinic });
+  S.set('pts_' + uid, []);
+  S.set('apts_' + uid, []);
+  S.set('ptid_' + uid, 1);
+  S.set('apid_' + uid, 1);
+  toast('Bem-vindo, ' + name.split(' ')[0] + '!', 'ok');
+  launchApp();
+}
+
+function doLogin() {
+  var email = document.getElementById('lEmail').value.trim();
+  var pass = document.getElementById('lPass').value;
+  if (!email) { showErr('lErr', 'Insere o teu email'); return; }
+  if (!pass) { showErr('lErr', 'Insere a tua password'); return; }
+  var accounts = S.get('accounts') || {};
+  var acc = accounts[email];
+  if (!acc) { showErr('lErr', 'Email não encontrado'); return; }
+  if (acc.pass !== pass) { showErr('lErr', 'Password incorreta'); return; }
+  S.set('session', { uid: acc.id, name: acc.name, email: acc.email, clinic: acc.clinic });
+  toast('Bem-vindo de volta, ' + acc.name.split(' ')[0] + '!', 'ok');
+  launchApp();
+}
+
+function doLogout() {
+  S.set('session', null);
+  show('sLanding');
+}
+
+function getSession() { return S.get('session'); }
+
+// ══════════════════════════════════════════
+// DATA HELPERS
+// ══════════════════════════════════════════
+function uid() { var s = getSession(); return s ? s.uid : 'guest'; }
+function getPts() { return S.get('pts_' + uid()) || []; }
+function getApts() { return S.get('apts_' + uid()) || []; }
+function savePts(a) { S.set('pts_' + uid(), a); }
+function saveApts(a) { S.set('apts_' + uid(), a); }
+function nextPtId() { var k = 'ptid_' + uid(); var v = S.get(k) || 1; S.set(k, v+1); return v; }
+function nextApId() { var k = 'apid_' + uid(); var v = S.get(k) || 1; S.set(k, v+1); return v; }
+function getPtById(id) { return getPts().filter(function(p) { return p.id === id; })[0]; }
+function initials(name) { return name.split(' ').slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+
+// ══════════════════════════════════════════
+// APP LAUNCH
+// ══════════════════════════════════════════
+function launchApp() {
+  var s = getSession();
+  document.getElementById('sClinicName').textContent = s ? s.clinic : 'Clínica';
+  document.getElementById('userAv').textContent = s ? initials(s.name) : '?';
+  var now = new Date();
+  document.getElementById('topbarDate').textContent = now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+  show('sApp');
+  goPage('dashboard');
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+var PAGE_TITLES = { dashboard:'Dashboard', agenda:'Agenda', patients:'Pacientes', patientDetail:'Ficha do Paciente', reminders:'Lembretes', setup:'Configurações' };
+var curPage = 'dashboard';
+
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(function(el) { el.classList.remove('on'); });
+  document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); });
+  var pageEl = document.getElementById('p-' + page);
+  if (pageEl) pageEl.classList.add('on');
+  var ni = document.getElementById('ni-' + page);
+  if (ni) ni.classList.add('active');
+  if (page === 'patients' || page === 'patientDetail') { var ni2 = document.getElementById('ni-patients'); if (ni2) ni2.classList.add('active'); }
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[page] || page;
+  curPage = page;
+  if (page === 'dashboard') renderDash();
+  if (page === 'agenda') renderCal();
+  if (page === 'patients') renderPatients();
+  if (page === 'reminders') renderRemLog();
+  if (page === 'setup') renderSetup();
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function renderDash() {
+  var today = new Date().toISOString().split('T')[0];
+  var apts = getApts();
+  var pts = getPts();
+  var todayApts = apts.filter(function(a) { return a.date === today; });
+  var ws = new Date(); ws.setDate(ws.getDate() - ws.getDay() + 1);
+  var we = new Date(ws); we.setDate(ws.getDate() + 6);
+  var weekApts = apts.filter(function(a) { var d = new Date(a.date); return d >= ws && d <= we; });
+
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+
+  document.getElementById('dashStats').innerHTML =
+    '<div class="stat accent"><div class="stat-lbl">Consultas hoje</div><div class="stat-val">'+todayApts.length+'</div><div class="stat-note">'+weekApts.length+' esta semana</div></div>' +
+    '<div class="stat"><div class="stat-lbl">Pacientes</div><div class="stat-val">'+pts.length+'</div><div class="stat-note">Total registados</div></div>' +
+    '<div class="stat"><div class="stat-lbl">Total consultas</div><div class="stat-val">'+apts.length+'</div><div class="stat-note">Desde o início</div></div>' +
+    '<div class="stat"><div class="stat-lbl">Esta semana</div><div class="stat-val">'+weekApts.length+'</div><div class="stat-note">Próximos 7 dias</div></div>';
+
+  var el = document.getElementById('dashAppts');
+  if (todayApts.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ei">📅</div><p>Sem consultas hoje — <a onclick="openModal(\'appt\')">marcar uma</a></p></div>';
+  } else {
+    el.innerHTML = todayApts.sort(function(a,b){return a.time.localeCompare(b.time);}).map(function(a) {
+      var p = getPtById(a.patientId); if (!p) return '';
+      return '<div class="appt-item"><div class="appt-time"><div class="t">'+a.time+'</div><div class="d">'+a.dur+'min</div></div><div class="appt-info"><div class="appt-name">'+p.name+'</div><div class="appt-type">'+a.type+'</div></div><span class="badge '+statusBadge(a.status)+'">'+statusLabel(a.status)+'</span></div>';
+    }).join('');
+  }
+
+  var recent = apts.slice().sort(function(a,b){return (b.date+b.time).localeCompare(a.date+a.time);}).slice(0,3);
+  document.getElementById('dashRem').innerHTML = recent.length === 0
+    ? '<div class="empty"><div class="ei">🔔</div><p>Sem lembretes ainda</p></div>'
+    : recent.map(function(a) {
+        var p = getPtById(a.patientId);
+        return '<div class="rem-item"><div class="rem-icon">📧</div><div class="rem-text">Lembrete enviado a <strong>'+(p?p.name:'—')+'</strong></div><div class="rem-date">'+new Date(a.date).toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+'</div><span style="color:var(--g600);font-size:13px">✓</span></div>';
+      }).join('');
+}
+
+function statusBadge(s) { return s==='confirmed'?'badge-ok':s==='waiting'?'badge-wait':'badge-cancel'; }
+function statusLabel(s) { return s==='confirmed'?'Confirmado':s==='waiting'?'A aguardar':'Cancelado'; }
+
+// ══════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════
+var weekOff = 0;
+var DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var HOURS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+
+function getWeekDays(off) {
+  var now = new Date(); var dow = now.getDay();
+  var mon = new Date(now); mon.setDate(now.getDate() - (dow===0?6:dow-1) + off*7);
+  return Array.from({length:7}, function(_,i) { var d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+}
+
+function renderCal() {
+  var days = getWeekDays(weekOff);
+  var todayStr = new Date().toISOString().split('T')[0];
+  var apts = getApts();
+  var opts = {day:'numeric',month:'short'};
+  document.getElementById('weekLbl').textContent = days[0].toLocaleDateString('pt-PT',opts) + ' – ' + days[6].toLocaleDateString('pt-PT',opts);
+
+  var h = '<div class="cal-head"><div></div>';
+  days.forEach(function(d) {
+    var isT = d.toISOString().split('T')[0] === todayStr;
+    h += '<div class="cal-head-cell'+(isT?' today':'')+'"><span>'+DAYS[d.getDay()]+'</span><span class="dn">'+d.getDate()+'</span></div>';
+  });
+  h += '</div><div class="cal-body">';
+  HOURS.forEach(function(hr) {
+    h += '<div class="cal-time">'+hr+'</div>';
+    days.forEach(function(d) {
+      var ds = d.toISOString().split('T')[0];
+      var dayApts = apts.filter(function(a){ return a.date===ds && a.time===hr; });
+      var evts = dayApts.map(function(a) {
+        var p = getPtById(a.patientId); if (!p) return '';
+        return '<div class="cal-event'+(a.status==='waiting'?' wait':a.status==='cancelled'?' cancel':'')+'" onclick="event.stopPropagation();viewAppt('+a.id+')">'+p.name.split(' ')[0]+' · '+a.type+'</div>';
+      }).join('');
+      h += '<div class="cal-cell" onclick="quickAppt(\''+ds+'\',\''+hr+'\')">'+evts+'</div>';
+    });
+  });
+  h += '</div>';
+  document.getElementById('calGrid').innerHTML = h;
+}
+
+function shiftWeek(d) { weekOff += d; renderCal(); }
+function resetWeek() { weekOff = 0; renderCal(); }
+function quickAppt(date, time) {
+  document.getElementById('aDate').value = date;
+  document.getElementById('aTime').value = time;
+  openModal('appt');
+}
+
+// ══════════════════════════════════════════
+// PATIENTS
+// ══════════════════════════════════════════
+function renderPatients() {
+  var q = (document.getElementById('patSearch').value || '').toLowerCase();
+  var pts = getPts().filter(function(p) {
+    if (!q) return true;
+    return p.name.toLowerCase().indexOf(q)>=0 || p.phone.indexOf(q)>=0 || (p.email||'').toLowerCase().indexOf(q)>=0;
+  });
+  document.getElementById('patSub').textContent = pts.length + ' paciente' + (pts.length!==1?'s':'') + ' registado' + (pts.length!==1?'s':'');
+  var apts = getApts();
+  if (pts.length === 0) {
+    document.getElementById('patBody').innerHTML = '<div class="empty" style="padding:44px"><div class="ei">👥</div><p>Ainda não tens pacientes — <a onclick="openModal(\'patient\')">adiciona o primeiro</a></p></div>';
+    return;
+  }
+  document.getElementById('patBody').innerHTML = pts.map(function(p) {
+    var last = apts.filter(function(a){return a.patientId===p.id;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0];
+    var ld = last ? new Date(last.date).toLocaleDateString('pt-PT',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    return '<div class="p-row" onclick="viewPt('+p.id+')"><div class="p-cell-name"><div class="p-av">'+initials(p.name)+'</div><div><div class="p-name">'+p.name+'</div><div class="p-id">#'+String(p.id).padStart(4,'0')+'</div></div></div><div><div class="p-text">'+p.phone+'</div><div class="p-muted">'+(p.email||'')+'</div></div><div class="p-text">'+ld+'</div><div><span class="badge badge-ok">Ativo</span></div><div><button class="act-btn" onclick="event.stopPropagation();viewPt('+p.id+')">Ver →</button></div></div>';
+  }).join('');
+}
+
+function viewPt(id) {
+  var p = getPtById(id); if (!p) return;
+  var apts = getApts().filter(function(a){return a.patientId===id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  var age = p.birth ? (new Date().getFullYear() - new Date(p.birth).getFullYear()) : null;
+  var next = apts.filter(function(a){return a.date>=new Date().toISOString().split('T')[0];}).sort(function(a,b){return a.date.localeCompare(b.date);})[0];
+
+  document.getElementById('patDetailBody').innerHTML =
+    '<div class="pt-head-card"><div class="pt-av-lg">'+initials(p.name)+'</div><div class="pt-detail-info" style="flex:1"><h2>'+p.name+'</h2><div class="pt-meta">'+(age?'<span>🎂 '+age+' anos</span>':'')+'<span>📞 '+p.phone+'</span>'+(p.email?'<span>📧 '+p.email+'</span>':'')+(p.nif?'<span>🪪 '+p.nif+'</span>':'')+'</div>'+(p.notes?'<div class="pt-note-box">📋 '+p.notes+'</div>':'')+'</div><div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-primary" onclick="openModalForPt('+p.id+')">+ Consulta</button><button class="btn btn-ghost" style="color:var(--red);border-color:var(--red)" onclick="deletePt('+p.id+')">Apagar</button></div></div>' +
+    '<div class="pt-grid"><div class="card"><div class="card-head"><div class="card-title">Histórico ('+apts.length+')</div></div><div class="card-body">'+
+    (apts.length===0?'<div class="empty"><div class="ei">📋</div><p>Sem consultas registadas</p></div>':
+      apts.map(function(a){return '<div class="hist-item"><div class="hist-date">'+new Date(a.date).toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+a.time+' · '+a.dur+'min</div><div class="hist-title">'+a.type+' <span class="badge '+statusBadge(a.status)+'" style="font-size:10px">'+statusLabel(a.status)+'</span></div>'+(a.notes?'<div class="hist-note">'+a.notes+'</div>':'')+'</div>';}).join('')) +
+    '</div></div><div class="card"><div class="card-head"><div class="card-title">Resumo</div></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px"><div><div style="font-size:11px;color:var(--n400);margin-bottom:2px">Total de consultas</div><div style="font-size:22px;font-weight:800;font-family:Syne,sans-serif;color:var(--g700)">'+apts.length+'</div></div><div><div style="font-size:11px;color:var(--n400);margin-bottom:2px">Paciente desde</div><div style="font-size:14px;font-weight:500">'+new Date(p.created).toLocaleDateString('pt-PT',{month:'long',year:'numeric'})+'</div></div><div><div style="font-size:11px;color:var(--n400);margin-bottom:2px">Próxima consulta</div><div style="font-size:14px;font-weight:500">'+(next?new Date(next.date).toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+' às '+next.time:'Sem marcação')+'</div></div></div></div></div></div>';
+
+  goPage('patientDetail');
+}
+
+function openModalForPt(id) { openModal('appt'); setTimeout(function(){ document.getElementById('aPatient').value = id; }, 30); }
+function deletePt(id) {
+  if (!confirm('Apagar este paciente? Ação irreversível.')) return;
+  savePts(getPts().filter(function(p){return p.id!==id;}));
+  toast('Paciente apagado', 'ok');
+  goPage('patients');
+}
+
+// ══════════════════════════════════════════
+// REMINDERS LOG
+// ══════════════════════════════════════════
+function renderRemLog() {
+  var apts = getApts().slice().sort(function(a,b){return (b.date+b.time).localeCompare(a.date+a.time);}).slice(0,8);
+  if (apts.length === 0) {
+    document.getElementById('remLog').innerHTML = '<div class="empty"><div class="ei">🔔</div><p>Ainda sem lembretes — cria consultas para começar</p></div>';
+    return;
+  }
+  document.getElementById('remLog').innerHTML = apts.map(function(a, i) {
+    var p = getPtById(a.patientId); var t = i%2===0?'email':'sms';
+    return '<div class="log-item"><span class="log-badge '+(t==='sms'?'log-sms':'log-email')+'">'+t.toUpperCase()+'</span><div class="log-text">Lembrete 24h a <strong>'+(p?p.name:'—')+'</strong> — '+a.type+' a '+new Date(a.date).toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+' às '+a.time+'</div><span class="log-ok">✓ Enviado</span></div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════
+function renderSetup() {
+  var s = getSession();
+  document.getElementById('setupName').value = s ? s.clinic : '';
+  var days = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  var sched = S.get('sched_'+uid()) || {0:true,1:true,2:true,3:true,4:true,5:false,6:false};
+  document.getElementById('scheduleBody').innerHTML = days.map(function(d,i){
+    return '<div class="toggle-row"><div><div class="toggle-lbl">'+d+'</div></div><label class="toggle-sw"><input type="checkbox" '+(sched[i]?'checked':'')+' onchange="saveSchedDay('+i+',this.checked)"><span class="toggle-track"></span></label></div>';
+  }).join('');
+}
+function updateClinicName() {
+  var v = document.getElementById('setupName').value;
+  document.getElementById('sClinicName').textContent = v || 'Clínica';
+  var s = getSession(); if (s) { s.clinic = v; S.set('session', s); }
+}
+function saveSchedDay(i, val) { var k = 'sched_'+uid(); var sc = S.get(k)||{}; sc[i]=val; S.set(k,sc); toast('Guardado','ok'); }
+
+// ══════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════
+function openModal(name) {
+  if (name === 'appt') {
+    var pts = getPts();
+    if (pts.length === 0) { toast('Adiciona um paciente primeiro', 'err'); openModal('patient'); return; }
+    document.getElementById('aPatient').innerHTML = pts.map(function(p){ return '<option value="'+p.id+'">'+p.name+'</option>'; }).join('');
+    if (!document.getElementById('aDate').value) document.getElementById('aDate').value = new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('m-'+name).classList.add('on');
+}
+function closeModal(name) { document.getElementById('m-'+name).classList.remove('on'); }
+
+function saveAppt() {
+  var pid = parseInt(document.getElementById('aPatient').value);
+  var date = document.getElementById('aDate').value;
+  var time = document.getElementById('aTime').value;
+  var type = document.getElementById('aType').value;
+  var dur = parseInt(document.getElementById('aDur').value);
+  var notes = document.getElementById('aNotes').value;
+  if (!pid || !date || !time) { toast('Preenche todos os campos', 'err'); return; }
+  var id = nextApId();
+  var apts = getApts();
+  apts.push({ id:id, patientId:pid, date:date, time:time, type:type, dur:dur, notes:notes, status:'confirmed' });
+  saveApts(apts);
+  var p = getPtById(pid);
+  closeModal('appt');
+  document.getElementById('aNotes').value = '';
+  toast('Consulta marcada — '+(p?p.name:'')+'  '+date+' às '+time, 'ok');
+  if (curPage==='dashboard') renderDash();
+  if (curPage==='agenda') renderCal();
+}
+
+function savePatient() {
+  var name = document.getElementById('pName').value.trim();
+  var birth = document.getElementById('pBirth').value;
+  var phone = document.getElementById('pPhone').value.trim();
+  var email = document.getElementById('pEmail').value.trim();
+  var nif = document.getElementById('pNif').value.trim();
+  var notes = document.getElementById('pNotes').value.trim();
+  if (!name) { toast('O nome é obrigatório', 'err'); return; }
+  if (!phone) { toast('O telefone é obrigatório', 'err'); return; }
+  var id = nextPtId();
+  var pts = getPts();
+  pts.push({ id:id, name:name, birth:birth, phone:phone, email:email, nif:nif, notes:notes, created:new Date().toISOString().split('T')[0] });
+  savePts(pts);
+  closeModal('patient');
+  ['pName','pBirth','pPhone','pEmail','pNif','pNotes'].forEach(function(i){ document.getElementById(i).value=''; });
+  toast(name + ' adicionado com sucesso', 'ok');
+  if (curPage==='patients') renderPatients();
+  if (curPage==='dashboard') renderDash();
+}
+
+function viewAppt(id) {
+  var a = getApts().filter(function(x){return x.id===id;})[0]; if (!a) return;
+  var p = getPtById(a.patientId);
+  document.getElementById('viewApptBody').innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:12px">'+
+    '<div style="display:flex;gap:16px"><div style="flex:1"><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Paciente</div><div style="font-weight:500">'+(p?p.name:'—')+'</div></div><div style="flex:1"><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Tipo</div><div style="font-weight:500">'+a.type+'</div></div></div>'+
+    '<div style="display:flex;gap:16px"><div style="flex:1"><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Data</div><div style="font-weight:500">'+new Date(a.date).toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'})+'</div></div><div style="flex:1"><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Hora</div><div style="font-weight:500">'+a.time+' · '+a.dur+'min</div></div></div>'+
+    '<div><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Estado</div><span class="badge '+statusBadge(a.status)+'">'+statusLabel(a.status)+'</span></div>'+
+    (a.notes?'<div><div style="font-size:11px;color:var(--n400);margin-bottom:3px">Notas</div><div style="font-size:13px;color:var(--n700)">'+a.notes+'</div></div>':'')+
+    '</div>';
+  document.getElementById('viewApptFoot').innerHTML =
+    '<button class="btn btn-ghost" style="color:var(--red)" onclick="cancelAppt('+id+')">Cancelar consulta</button>'+
+    '<button class="btn btn-ghost" onclick="closeModal(\'viewAppt\')">Fechar</button>';
+  closeModal('appt');
+  document.getElementById('m-viewAppt').classList.add('on');
+}
+
+function cancelAppt(id) {
+  var apts = getApts(); var a = apts.filter(function(x){return x.id===id;})[0]; if (!a) return;
+  a.status = 'cancelled'; saveApts(apts);
+  closeModal('viewAppt'); toast('Consulta cancelada', 'ok');
+  if (curPage==='agenda') renderCal();
+  if (curPage==='dashboard') renderDash();
+}
+
+// Close modals clicking outside
+document.querySelectorAll('.modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e) { if (e.target === el) el.classList.remove('on'); });
+});
+
+// Close auth clicking outside
+document.getElementById('sAuth').addEventListener('click', function(e) {
+  if (e.target === this) closeAuth();
+});
+
+// Enter key on auth
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  var auth = document.getElementById('sAuth');
+  if (!auth.classList.contains('on')) return;
+  if (document.getElementById('formRegister').style.display !== 'none') doRegister();
+  else doLogin();
+});
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.innerHTML = (type==='ok'?'✓':type==='err'?'✗':'ℹ') + ' ' + msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3500);
+}
+
+function submitFeedback() {
+  var msg = document.getElementById('fbMsg').value.trim();
+  if (!msg) { toast('Escreve uma mensagem primeiro', 'err'); return; }
+  var subject = document.getElementById('fbSubject').value;
+  var email = document.getElementById('fbEmail').value.trim();
+  var body = 'Assunto: ' + subject + '\n\n' + msg + (email ? '\n\nResposta para: ' + email : '');
+  var link = 'mailto:rodriguesmmiguel25@gmail.com?subject=' + encodeURIComponent('[ClinicaFlow Feedback] ' + subject) + '&body=' + encodeURIComponent(body);
+  window.open(link, '_blank');
+  document.getElementById('fbMsg').value = '';
+  document.getElementById('fbEmail').value = '';
+  toast('Obrigado pelo feedback! 🙏', 'ok');
+}
+
+function openSupportModal() { document.getElementById('m-support').classList.add('on'); }
+function openChatModal() { document.getElementById('m-chat').classList.add('on'); }
+function openHelpModal() { renderHelp(); document.getElementById('m-help').classList.add('on'); }
+
+function sendSupport() {
+  var msg = document.getElementById('supMsg').value.trim();
+  var email = document.getElementById('supEmail').value.trim();
+  var subject = document.getElementById('supSubject').value;
+  if (!msg) { toast('Descreve o teu problema', 'err'); return; }
+  if (!email || email.indexOf('@') < 0) { toast('Insere um email válido', 'err'); return; }
+  var body = 'Assunto: ' + subject + '\nDe: ' + email + '\n\n' + msg;
+  var link = 'mailto:rodriguesmmiguel25@gmail.com?subject=' + encodeURIComponent('[ClinicaFlow Suporte] ' + subject) + '&body=' + encodeURIComponent(body);
+  window.open(link, '_blank');
+  document.getElementById('supMsg').value = '';
+  document.getElementById('supEmail').value = '';
+  closeModal('support');
+  toast('Mensagem enviada! Respondemos em breve.', 'ok');
+}
+
+var chatReplies = [
+  'Percebi! Vou verificar isso para ti.',
+  'Boa pergunta. Podes encontrar essa opção nas Configurações da clínica.',
+  'Para isso, vai à secção de Pacientes e clica em "+ Novo paciente".',
+  'Os lembretes são configuráveis na secção Lembretes. Podes activar por SMS e email.',
+  'Temos uma equipa disponível de seg a sex das 9h às 18h. Vou escalar o teu caso!',
+  'Consegues fazer isso directamente na agenda — clica numa célula horária para marcar.',
+];
+var chatCount = 0;
+
+function sendChat() {
+  var inp = document.getElementById('chatInput');
+  var msg = inp.value.trim(); if (!msg) return;
+  inp.value = '';
+  var wrap = document.getElementById('chatMessages');
+  var now = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit'});
+  wrap.innerHTML += '<div class="chat-msg user"><div class="chat-bubble">'+msg+'</div><div class="chat-time">'+now+'</div></div>';
+  wrap.scrollTop = wrap.scrollHeight;
+  setTimeout(function() {
+    var reply = chatReplies[chatCount % chatReplies.length]; chatCount++;
+    wrap.innerHTML += '<div class="chat-msg agent"><div class="chat-bubble">'+reply+'</div><div class="chat-time">Agora</div></div>';
+    wrap.scrollTop = wrap.scrollHeight;
+  }, 900);
+}
+
+var HELP_ARTICLES = [
+  { q: 'Como adiciono o primeiro paciente?', a: 'Vai à secção "Pacientes" na barra lateral e clica em "+ Novo paciente". Preenche o nome e telefone (obrigatórios) e guarda. Também podes adicionar diretamente ao marcar uma consulta.' },
+  { q: 'Como marco uma consulta?', a: 'Clica em "+ Nova consulta" no dashboard ou na agenda. Seleciona o paciente, data, hora e tipo. Podes também clicar diretamente numa célula do calendário semanal para pré-preencher data e hora.' },
+  { q: 'Como funcionam os lembretes automáticos?', a: 'Na secção "Lembretes" podes configurar quando e como os pacientes são notificados — 48h antes, 24h antes, ou no próprio dia. Podes activar separadamente por email e SMS.' },
+  { q: 'Os meus dados estão seguros?', a: 'Sim. Todos os dados ficam guardados localmente no teu browser e não são partilhados com terceiros. Cumprimos o RGPD. Numa versão futura, terás backup automático na cloud com encriptação.' },
+  { q: 'Posso ter vários profissionais na mesma conta?', a: 'No plano Clínica e Pro sim — podes ter profissionais ilimitados. No plano Básico o limite é 2 profissionais.' },
+  { q: 'Como cancelo uma consulta?', a: 'Na agenda, clica na consulta para ver os detalhes. No modal que abre, clica em "Cancelar consulta". A consulta fica marcada como cancelada no histórico do paciente.' },
+  { q: 'Como altero o nome da clínica?', a: 'Vai a "Configurações" na barra lateral. Podes alterar o nome da clínica, especialidade e horários de funcionamento.' },
+  { q: 'Posso exportar os dados dos pacientes?', a: 'A exportação de dados estará disponível em breve. Por agora, podes consultar todos os dados na ficha individual de cada paciente.' },
+];
+
+function renderHelp(filter) {
+  filter = (filter || '').toLowerCase();
+  var items = HELP_ARTICLES.filter(function(a) {
+    return !filter || a.q.toLowerCase().indexOf(filter) >= 0 || a.a.toLowerCase().indexOf(filter) >= 0;
+  });
+  var el = document.getElementById('helpList');
+  if (items.length === 0) { el.innerHTML = '<div class="empty"><div class="ei">🔍</div><p>Nenhum artigo encontrado</p></div>'; return; }
+  el.innerHTML = items.map(function(a, i) {
+    return '<div class="help-item" id="hi'+i+'"><div class="help-q" onclick="toggleHelp('+i+')"><span>'+a.q+'</span><span class="help-chevron">▼</span></div><div class="help-a">'+a.a+'</div></div>';
+  }).join('');
+}
+
+function toggleHelp(i) {
+  var el = document.getElementById('hi'+i);
+  el.classList.toggle('open');
+}
+
+function filterHelp() {
+  renderHelp(document.getElementById('helpSearch').value);
+}
+
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  if (getSession()) launchApp();
+});
+</script>
+</body>
+</html>
